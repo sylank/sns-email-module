@@ -12,8 +12,16 @@ resource "aws_sns_topic_subscription" "letter_queue_subscription" {
   endpoint  = "${aws_sqs_queue.letter_queue.arn}"
 }
 
-resource "aws_sns_topic_subscription" "email_subscription" {
-  topic_arn = "${aws_sns_topic.email_topic.arn}"
-  protocol  = "email"
-  endpoint  = "${var.email_address}"
+resource "null_resource" "sns_subscribe" {
+  depends_on = ["aws_sns_topic.email_topic"]
+
+  triggers = {
+    sns_topic_arn = "${aws_sns_topic.email_topic.arn}"
+  }
+
+  count = "${length(var.email_address_list)}"
+
+  provisioner "local-exec" {
+    command = "aws sns subscribe --topic-arn ${aws_sns_topic.email_topic.arn} --protocol email --notification-endpoint ${element(var.email_address_list, count.index)}"
+  }
 }

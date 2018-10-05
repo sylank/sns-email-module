@@ -6,6 +6,6 @@ variable "letter_queue_name" {
   
 }
 
-variable "email_address" {
+variable "email_address_list" {
   
 }
